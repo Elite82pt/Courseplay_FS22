@@ -149,11 +149,11 @@ function Waypoint:setOffsetPosition(offsetX, offsetZ, dx, dz)
 end
 
 function Waypoint:getDistanceFromPoint(x, z)
-	return courseplay:distance(x, z, self.x, self.z)
+	return MathUtil.getPointPointDistance(x, z, self.x, self.z)
 end
 
 function Waypoint:getDistanceFromVehicle(vehicle)
-	local vx, _, vz = getWorldTranslation(vehicle.cp.directionNode or vehicle.rootNode)
+	local vx, _, vz = getWorldTranslation(vehicle:getAIDirectionNode() or vehicle.rootNode)
 	return self:getDistanceFromPoint(vx, vz)
 end
 

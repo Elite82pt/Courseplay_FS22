@@ -146,7 +146,7 @@ function AIReverseDriver:getDriveData()
 	local gx, _, gz = localToWorld(self.vehicle:getAIDirectionNode(), lx, 0, lz)
 	DebugUtil.drawDebugLine(gx, ty, gz, gx, ty + 3, gz, 1, 0, 0)
 	-- TODO_22 reverse speed
-	return gx, gz, false, 5
+	return gx, gz, false, self.vehicle.settings.reverseSpeed:getValue()
 end
 
 function AIReverseDriver:getLocalYRotationToPoint(node, x, y, z, direction)

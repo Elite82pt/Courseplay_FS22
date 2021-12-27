@@ -24,7 +24,6 @@ AIDriveStrategyFieldWorkCourse = {}
 local AIDriveStrategyFieldWorkCourse_mt = Class(AIDriveStrategyFieldWorkCourse, AIDriveStrategyCourse)
 
 AIDriveStrategyFieldWorkCourse.myStates = {
-    INITIAL = {},
     WORKING = {},
     ON_CONNECTING_TRACK = {},
     ON_ALIGNMENT_COURSE = {},
@@ -79,6 +78,8 @@ function AIDriveStrategyFieldWorkCourse:update()
         -- TODO_22 check user setting
         if self.course:isTemporary() then
            self.course:draw()
+        elseif self.ppc:getCourse():isTemporary() then
+            self.ppc:getCourse():draw()
         end
     end
 end
@@ -107,8 +108,8 @@ function AIDriveStrategyFieldWorkCourse:getDriveData(dt, vX, vY, vZ)
     ----------------------------------------------------------------
     if self.state == self.states.INITIAL then
         self:setMaxSpeed(0)
-        self:lowerImplements()
         self.state = self.states.WAITING_FOR_LOWER
+        self:lowerImplements()
     elseif self.state == self.states.WAITING_FOR_LOWER then
         self:setMaxSpeed(0)
         if self.vehicle:getCanAIFieldWorkerContinueWork() then
@@ -312,6 +313,15 @@ function AIDriveStrategyFieldWorkCourse:onWaypointChange(ix, course)
         if course:getDistanceToLastWaypoint(ix) < 5 then
             self:debug('alignment after connecting track ended, back to work, first lowering implements.')
             self.state = self.states.WORKING
+            self:lowerImplements()
+            self.ppc:setNormalLookaheadDistance()
+            self:startRememberedCourse()
+        end
+    elseif self.state == self.states.DRIVING_TO_COURSE_START then
+        local fm, _ = self:getFrontAndBackMarkers()
+        if course:getDistanceToLastWaypoint(ix) < math.max(fm + 2, 0) then
+            self:debug('alignment to first waypoint ended, start work, first lowering implements.')
+            self.state = self.states.WAITING_FOR_LOWER
             self:lowerImplements()
             self.ppc:setNormalLookaheadDistance()
             self:startRememberedCourse()

@@ -1846,7 +1846,7 @@ end
 
 function AIDriveStrategyCombineCourse:onDraw()
 
-	if CpUtil.debugChannels[CpDebug.DBG_IMPLEMENTS] then
+	if CpDebug:isChannelActive(CpDebug.DBG_IMPLEMENTS) then
 
 		local dischargeNode = self:getCurrentDischargeNode()
 		if dischargeNode then
@@ -1858,7 +1858,7 @@ function AIDriveStrategyCombineCourse:onDraw()
 		end
 	end
 
-	if CpUtil.debugChannels[CpDebug.DBG_PATHFINDER] then
+	if CpDebug:isChannelActive(CpDebug.DBG_PATHFINDER) then
 		local areaToAvoid = self:getAreaToAvoid()
 		if areaToAvoid then
 			local x, y, z = localToWorld(areaToAvoid.node, areaToAvoid.xOffset, 0, areaToAvoid.zOffset)

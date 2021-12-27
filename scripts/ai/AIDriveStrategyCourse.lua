@@ -24,7 +24,8 @@ AIDriveStrategyCourse = {}
 local AIDriveStrategyCourse_mt = Class(AIDriveStrategyCourse, AIDriveStrategy)
 
 AIDriveStrategyCourse.myStates = {
-    DEFAULT = {},
+    INITIAL = {},
+    DRIVING_TO_COURSE_START = {}
 }
 
 function AIDriveStrategyCourse.new(customMt)
@@ -97,7 +98,7 @@ function AIDriveStrategyCourse:setAIVehicle(vehicle)
     local job = vehicle:getJob()
     local startAt, startIx
     if job and job.getCpJobParameters then
-        self:debug('Got job parameters, starting at %d', job:getCpJobParameters().startAt:getValue())
+        self:debug('Got job parameters, starting at %s', job:getCpJobParameters().startAt)
         startAt = job:getCpJobParameters().startAt:getValue()
     else
         self:debug('No job parameters found, starting at nearest waypoint')
@@ -110,6 +111,18 @@ function AIDriveStrategyCourse:setAIVehicle(vehicle)
     else
         self:debug('Starting course at the first waypoint')
         startIx = 1
+    end
+    local distance = course:getDistanceBetweenVehicleAndWaypoint(vehicle, startIx)
+    if distance > 2 * self.turningRadius then
+        self:debug('Start waypoint is far (%.1f m), use an alignment course to get there.', distance)
+        self:rememberCourse(course, startIx)
+        self.ppc:setShortLookaheadDistance()
+        -- TODO: zOffset should be -frontMarkerDistance?
+        self:startCourse(AlignmentCourse(self.vehicle, self.vehicle:getAIDirectionNode(), self.turningRadius,
+                course, startIx, -2):getCourse(), 1)
+        self.state = self.states.DRIVING_TO_COURSE_START
+    else
+        self.state = self.states.INITIAL
     end
     self:startCourse(course, startIx)
 end
